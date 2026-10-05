@@ -1,12 +1,19 @@
 /* 작룡투 서비스 워커: 한 번 열면 오프라인에서도 실행됩니다. 파일을 고치면 VERSION 값을 올리세요. */
-const VERSION = 'jakryongtu-v1';
+const VERSION = 'jakryongtu-v2';
 const CORE = [
   './',
   'index.html',
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',
-  'icons/icon-maskable-512.png'
+  'icons/icon-maskable-512.png',
+  'assets/sprites.json',
+  'assets/pieces.png',
+  'assets/board.png',
+  'assets/tray-blue-h.png',
+  'assets/tray-blue-v.png',
+  'assets/tray-red-h.png',
+  'assets/tray-red-v.png'
 ];
 
 self.addEventListener('install', (e) => {

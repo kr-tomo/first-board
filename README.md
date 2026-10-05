@@ -6,6 +6,7 @@
 - manifest.webmanifest: 앱 이름, 아이콘, 전체 화면 실행 설정
 - sw.js: 오프라인 실행용 서비스 워커
 - icons/: 192, 512, 마스커블 아이콘
+- assets/: 말, 보드, 잡은 말 영역 그림(PNG)과 sprites.json. 그림 교체 방법은 assets/README.md 를 보세요.
 
 ## 올리는 곳 예시
 GitHub Pages, Netlify, Cloudflare Pages처럼 정적 파일을 HTTPS로 제공하는 곳이면 됩니다.
