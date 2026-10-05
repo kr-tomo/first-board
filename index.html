@@ -57,6 +57,12 @@ button:focus-visible{outline:3px solid var(--hl);outline-offset:2px}
   display:grid;gap:8px;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto minmax(0,1fr);
   grid-template-areas:"head" "seg" "status" "stage"}
 .app.land{grid-template-columns:190px minmax(0,1fr);grid-template-areas:"head stage" "seg stage" "status stage" "gap stage"}
+/* 넓은 세로 화면(태블릿): 제목·버튼·게임 방식을 한 줄로 합쳐 보드에 높이를 더 줍니다. */
+.app.wide{grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);column-gap:14px;grid-template-areas:"head seg" "status status" "stage stage"}
+.app.wide .top{flex-wrap:nowrap;gap:12px}
+.app.wide h1 small{display:inline}
+.app.wide .status{height:44px;padding-block:4px}
+.app.wide .seg{align-self:center}
 
 .top{grid-area:head;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;min-width:0}
 h1{margin:0;font-family:var(--f-display);font-weight:900;font-size:1.5rem;letter-spacing:.06em;line-height:1;white-space:nowrap}
@@ -486,8 +492,12 @@ function loadSprites(){
 function fitApp(){
   var app=$('app'),vw=window.innerWidth,vh=window.innerHeight;
   var land=vw/vh>=0.95,s,dw,dh;
-  if(land){dh=420;s=vh/dh;dw=vw/s;}else{dw=420;s=vw/dw;dh=vh/s;}
+  /* 폰은 기존대로 폭(세로) 또는 높이(가로) 420 기준. 태블릿처럼 큰 화면은 배율을 CAP 이하로 묶어 글자가 커지지 않게 하고, 늘어난 공간은 보드가 씁니다. */
+  var CAP=1.12;
+  if(land){s=Math.min(vh/420,CAP);dh=vh/s;dw=vw/s;}
+  else{s=Math.min(vw/420,CAP);dw=vw/s;dh=vh/s;}
   app.classList.toggle('land',land);
+  app.classList.toggle('wide',!land&&dw>=520);
   app.style.width=dw+'px';app.style.height=dh+'px';
   app.style.setProperty('--s',String(s));
   app.style.transform='scale('+s+')';
