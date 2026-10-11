@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="청룡과 주작이 신수 말로 겨루는 3×4 보드게임">
+<meta name="description" content="펄기아와 디아루가가 겨루는 3×4 보드게임">
 <meta name="theme-color" content="#e5eae6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1511" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
@@ -19,12 +19,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;900&display=swap">
 <style>
-/* Layout: one-screen board game. Status line, 주작 tray, 3×4 board, 청룡 tray, controls. Board width is capped by viewport height so it fits a phone. */
+/* Layout: one-screen board game. Status line, 디아루가 tray (top), 3×4 board, 펄기아 tray (bottom), controls. Board width is capped by viewport height so it fits a phone. */
 :root{
   --bg:#e5eae6; --panel:#f2f5f2; --fg:#17221d; --muted:#586861; --line:#b4c0b7;
   --board:#d8c79f; --board2:#cdba8f; --grid:#6e5c3b; --grain:rgba(110,92,59,.09);
-  --blue:#23517f; --red:#a8322a; --ivory:#f7f0dd;
-  --tint-blue:rgba(35,81,127,.16); --tint-red:rgba(168,50,42,.16);
+  --c0:#a8322a; --c1:#23517f; --ivory:#f7f0dd;
+  --tint0:rgba(168,50,42,.16); --tint1:rgba(35,81,127,.16);
   --hl:#d99a00; --capture:#c4281c;
   --f-display:'Noto Serif KR','Batang','Nanum Myeongjo',serif;
   --f-body:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
@@ -33,16 +33,16 @@
   :root:not([data-theme="light"]){
     --bg:#0f1511; --panel:#18211b; --fg:#e8efea; --muted:#9aa99f; --line:#2c3a31;
     --board:#3b3427; --board2:#342e22; --grid:#8f7c52; --grain:rgba(143,124,82,.12);
-    --blue:#4a86c2; --red:#d4574c; --ivory:#f7f0dd;
-    --tint-blue:rgba(74,134,194,.22); --tint-red:rgba(212,87,76,.22);
+    --c0:#d4574c; --c1:#4a86c2; --ivory:#f7f0dd;
+    --tint0:rgba(212,87,76,.22); --tint1:rgba(74,134,194,.22);
     --hl:#f0b429; --capture:#ff6b5c; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0f1511; --panel:#18211b; --fg:#e8efea; --muted:#9aa99f; --line:#2c3a31;
   --board:#3b3427; --board2:#342e22; --grid:#8f7c52; --grain:rgba(143,124,82,.12);
-  --blue:#4a86c2; --red:#d4574c; --ivory:#f7f0dd;
-  --tint-blue:rgba(74,134,194,.22); --tint-red:rgba(212,87,76,.22);
+  --c0:#d4574c; --c1:#4a86c2; --ivory:#f7f0dd;
+  --tint0:rgba(212,87,76,.22); --tint1:rgba(74,134,194,.22);
   --hl:#f0b429; --capture:#ff6b5c; color-scheme:dark;
 }
 html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none}
@@ -83,7 +83,7 @@ h1 small{font-family:var(--f-body);font-weight:500;font-size:.7rem;letter-spacin
 .app.land .status{height:auto;min-height:50px}
 .status>div{min-width:0}
 .dot{flex:none;width:14px;height:14px;border-radius:50%;background:var(--muted)}
-.dot.p0{background:var(--blue)} .dot.p1{background:var(--red)}
+.dot.p0{background:var(--c0)} .dot.p1{background:var(--c1)}
 .status b{display:block;font-size:.95rem;line-height:1.25}
 .status span{display:block;font-size:.74rem;color:var(--muted);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .app.land .status span{white-space:normal}
@@ -103,7 +103,7 @@ h1 small{font-family:var(--f-body);font-weight:500;font-size:.7rem;letter-spacin
 }
 
 .tray{position:relative;overflow:hidden;display:flex;align-items:center;gap:8px;min-width:0;padding:5px 8px;border:1px solid color-mix(in srgb,var(--tc) 40%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--tc) 13%,var(--bg));transition:box-shadow .15s}
-.tray.t0{--tc:var(--blue)} .tray.t1{--tc:var(--red)}
+.tray.t0{--tc:var(--c0)} .tray.t1{--tc:var(--c1)}
 .tray.on{box-shadow:inset 0 0 0 2px var(--tc)}
 .trbg{position:absolute;inset:0;z-index:0;pointer-events:none}
 .trbg .tp{fill:none;stroke:var(--tc);stroke-width:.9;opacity:.3}
@@ -117,7 +117,7 @@ h1 small{font-family:var(--f-body);font-weight:500;font-size:.7rem;letter-spacin
 .tray .lbl{flex:none;display:flex;flex-direction:column;gap:2px;font-size:.72rem;color:var(--muted);line-height:1.15;min-width:3.1em}
 .tray .lbl strong{font-family:var(--f-display);font-size:.95rem;color:var(--fg)}
 .tray .lbl i{font-style:normal;display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
-.tray.t1 .lbl i{background:var(--red)} .tray.t0 .lbl i{background:var(--blue)}
+.tray.t1 .lbl i{background:var(--c1)} .tray.t0 .lbl i{background:var(--c0)}
 .mode-two .tray.t1 .lbl{transform:rotate(180deg)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0;flex:1}
 .empty{font-size:.72rem;color:var(--muted)}
@@ -135,8 +135,8 @@ h1 small{font-family:var(--f-body);font-weight:500;font-size:.7rem;letter-spacin
 .cell{position:relative;padding:0;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;box-shadow:inset 0 0 0 .5px var(--grid)}
 .cell.alt{background:var(--board2)}
 .cell::before{content:"";position:absolute;inset:0;pointer-events:none}
-.cell.r0::before{background:var(--tint-red)}
-.cell.r3::before{background:var(--tint-blue)}
+.cell.r0::before{background:var(--tint1)}
+.cell.r3::before{background:var(--tint0)}
 .cell::after{content:"";position:absolute;pointer-events:none;border-radius:50%}
 .cell.tgt::after{width:22%;height:22%;background:var(--hl);opacity:.9}
 .cell.cap::after{inset:5%;border:4px solid var(--capture);border-radius:12px}
@@ -144,8 +144,8 @@ h1 small{font-family:var(--f-body);font-weight:500;font-size:.7rem;letter-spacin
 .cell.last{box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--hl) 70%,transparent)}
 .cell:disabled{cursor:default}
 
-.pc{display:block;width:88%;aspect-ratio:1;--pc:var(--blue);position:relative;z-index:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.32))}
-.pc.p1{--pc:var(--red)}
+.pc{display:block;width:88%;aspect-ratio:1;--pc:var(--c0);position:relative;z-index:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.32))}
+.pc.p1{--pc:var(--c1)}
 .pc svg{display:block;width:100%;height:100%;overflow:visible}
 .pc.opp svg{transform:rotate(180deg)}
 .pc .tile{fill:var(--pc);stroke:rgba(0,0,0,.45);stroke-width:2.5;stroke-linejoin:round}
@@ -201,7 +201,7 @@ h1 small{font-family:var(--f-body);font-weight:500;font-size:.7rem;letter-spacin
 <body>
 <main class="app" id="app">
   <div class="top">
-    <h1>포켓배틀<small>靑龍 · 朱雀</small></h1>
+    <h1>포켓배틀<small>펄기아 · 디아루가</small></h1>
     <div class="btns">
       <button class="link" id="undoBtn" type="button">무르기</button>
       <button class="link" id="newBtn" type="button">새 게임</button>
@@ -240,19 +240,19 @@ h1 small{font-family:var(--f-body);font-weight:500;font-size:.7rem;letter-spacin
     <h2 id="rulesTitle">규칙 <button class="link" id="closeRules" type="button">닫기</button></h2>
     <h3>목표</h3>
     <ul>
-      <li>상대 대장을 잡으면 승리합니다.</li>
+      <li>상대 대장(디아루가 또는 펄기아)을 잡으면 승리합니다.</li>
       <li>내 대장을 상대 진영(맨 끝 줄)까지 보내고, 상대가 바로 다음 수에 잡지 못하면 승리합니다.</li>
     </ul>
     <h3>이동과 잡기</h3>
     <ul>
       <li>말은 바깥에 그려진 화살표 방향으로 한 칸 움직입니다. 말은 항상 자기 쪽을 향해 놓입니다.</li>
       <li>상대 말이 있는 칸으로 이동하면 그 말을 잡아 내 옆에 둡니다.</li>
-      <li>거북기가 상대 진영에 도착하면 뒤집혀 현무가 됩니다. 현무를 잡으면 거북기로 돌아옵니다.</li>
+      <li>잉어킹이 상대 진영에 도착하면 뒤집혀 갸라도스가 됩니다. 갸라도스를 잡으면 잉어킹으로 돌아옵니다.</li>
     </ul>
     <h3>말 놓기</h3>
     <ul>
       <li>내 차례에 이동 대신, 잡은 말을 원하는 빈칸에 놓을 수 있습니다.</li>
-      <li>거북기를 상대 진영에 바로 놓으면 현무로 변하지 않습니다.</li>
+      <li>잉어킹을 상대 진영에 바로 놓으면 갸라도스로 변하지 않습니다.</li>
     </ul>
     <h3>무승부</h3>
     <ul><li>같은 장면이 세 번 반복되면 무승부입니다.</li></ul>
@@ -264,7 +264,7 @@ h1 small{font-family:var(--f-body);font-weight:500;font-size:.7rem;letter-spacin
 <script>
 // ENGINE START
 const GOAL=[0,3];
-const HT=[2,3,4];            // 손에 쥘 수 있는 말: 백호, 기린, 거북기
+const HT=[2,3,4];            // 손에 쥘 수 있는 말: 리자몽, 이상해꽃, 잉어킹
 const HI={2:0,3:1,4:2};
 const MOVES={1:['N','NE','E','SE','S','SW','W','NW'],2:['N','E','S','W'],3:['NE','SE','SW','NW'],4:['N'],5:['N','E','S','W','NE','NW']};
 const DIRS={N:[0,-1],NE:[1,-1],E:[1,0],SE:[1,1],S:[0,1],SW:[-1,1],W:[-1,0],NW:[-1,-1]};
@@ -273,8 +273,8 @@ for(const t in MOVES){VEC[t]=[MOVES[t].map(d=>DIRS[d]),MOVES[t].map(d=>[-DIRS[d]
 
 function init(){
   const b=new Array(12).fill(0);
-  b[9]=3;b[10]=1;b[11]=2;b[7]=4;                 // 청룡: 기린 대장 백호 / 거북기
-  b[0]=2+8;b[1]=1+8;b[2]=3+8;b[4]=4+8;           // 주작: (자기 기준 오른쪽) 백호, 대장, 기린 / 거북기
+  b[9]=3;b[10]=1;b[11]=2;b[7]=4;                 // 펄기아(아래): 이상해꽃 대장 리자몽 / 잉어킹
+  b[0]=2+8;b[1]=1+8;b[2]=3+8;b[4]=4+8;           // 디아루가(위): (자기 기준 오른쪽) 리자몽, 대장, 이상해꽃 / 잉어킹
   return {b,h:[[0,0,0],[0,0,0]],turn:0,win:-1};
 }
 function gen(s){
@@ -379,15 +379,16 @@ function aiPick(s,level,rep){
 }
 // ENGINE END
 
-const NAMES={1:'대장',2:'백호',3:'기린',4:'거북기',5:'현무'};
+const NAMES={1:'대장',2:'리자몽',3:'이상해꽃',4:'잉어킹',5:'갸라도스'};
 const GLYPH={1:'將',2:'虎',3:'麟',4:'龜',5:'玄'};
 const ANG={N:0,NE:45,E:90,SE:135,S:180,SW:225,W:270,NW:315};
 const POS={N:[50,21],NE:[77,33],E:[79,56],SE:[77,79],S:[50,82],SW:[23,79],W:[21,56],NW:[23,33]};
-const PLAYER=['청룡','주작'];
+const PLAYER=['펄기아','디아루가'];
+function nameOf(t,o){return t===1?PLAYER[o]:NAMES[t];}
 
 /* 직접 그린 동물 일러스트 (좌표 -18..18, 위쪽이 말의 앞쪽) */
 const ICON={
-  // 청룡 대장: 정면 용 얼굴
+  // 디아루가 대장(위 팀): 정면 용 얼굴
   dragon:
     '<path class="ic" d="M-7-8Q-10-16-16-17Q-12-11-11-5Z"/><path class="ic" d="M7-8Q10-16 16-17Q12-11 11-5Z"/>'+
     '<path class="ic" d="M-12-6Q0-12 12-6Q16 4 8 12Q0 17-8 12Q-16 4-12-6Z"/>'+
@@ -396,7 +397,7 @@ const ICON={
     '<circle class="dt" cx="-6" cy="-0.5" r="2.2"/><circle class="dt" cx="6" cy="-0.5" r="2.2"/>'+
     '<circle class="dt" cx="-2.5" cy="8" r="1.3"/><circle class="dt" cx="2.5" cy="8" r="1.3"/>'+
     '<path class="dt" d="M0-9L2.4-5.5L0-2L-2.4-5.5Z"/>',
-  // 주작 대장: 날개를 편 봉황
+  // 펄기아 대장(아래 팀): 날개를 편 봉황
   bird:
     '<path class="ic" d="M-3 0L-17-12L-14-3L-18 1L-13 5L-15 11L-3 7Z"/><path class="ic" d="M3 0L17-12L14-3L18 1L13 5L15 11L3 7Z"/>'+
     '<path class="sk" d="M-3 11Q-5 14-4.5 15.5M0 12V16M3 11Q5 14 4.5 15.5"/>'+
@@ -404,7 +405,7 @@ const ICON={
     '<path class="ic" d="M-1.9-12L0-17L1.9-12Z"/>'+
     '<path class="sd" d="M-5 1L-13-6M-5 4L-12 5M5 1L13-6M5 4L12 5"/>'+
     '<circle class="dt" cx="-1.6" cy="-9.5" r="0.9"/><circle class="dt" cx="1.6" cy="-9.5" r="0.9"/>',
-  // 백호: 정면 호랑이 얼굴
+  // 리자몽: 정면 호랑이 얼굴
   tiger:
     '<circle class="ic" cx="-11" cy="-12" r="5"/><circle class="ic" cx="11" cy="-12" r="5"/>'+
     '<circle class="dt" cx="-11" cy="-12" r="2"/><circle class="dt" cx="11" cy="-12" r="2"/>'+
@@ -412,7 +413,7 @@ const ICON={
     '<path class="sd" d="M0-12V-5M-5-11L-4-5M5-11L4-5M-16 0L-10 1M-15 6L-10 5M16 0L10 1M15 6L10 5M0 10V12M0 12Q-3 14-5 12M0 12Q3 14 5 12"/>'+
     '<circle class="dt" cx="-6" cy="0" r="2.4"/><circle class="dt" cx="6" cy="0" r="2.4"/>'+
     '<path class="dt" d="M-3.4 5H3.4L0 9.2Z"/>',
-  // 기린: 뿔 달린 정면 얼굴과 갈기
+  // 이상해꽃: 뿔 달린 정면 얼굴과 갈기
   qilin:
     '<path class="ic" d="M-1.8-9L0-18L1.8-9Z"/>'+
     '<ellipse class="ic" cx="-9" cy="-8" rx="2.6" ry="4.2" transform="rotate(-30 -9 -8)"/><ellipse class="ic" cx="9" cy="-8" rx="2.6" ry="4.2" transform="rotate(30 9 -8)"/>'+
@@ -420,14 +421,14 @@ const ICON={
     '<path class="ic" d="M-8-9Q0-12 8-9Q11 0 6 10Q0 14-6 10Q-11 0-8-9Z"/>'+
     '<circle class="dt" cx="-4" cy="-2" r="1.9"/><circle class="dt" cx="4" cy="-2" r="1.9"/>'+
     '<ellipse class="dt" cx="0" cy="7.5" rx="3.6" ry="2.6"/><circle class="ic" cx="-1.3" cy="7.5" r=".7"/><circle class="ic" cx="1.3" cy="7.5" r=".7"/>',
-  // 거북기: 머리가 앞을 향한 거북이를 위에서 본 모습
+  // 잉어킹: 머리가 앞을 향한 거북이를 위에서 본 모습
   turtle:
     '<circle class="ic" cx="-12" cy="-7" r="4"/><circle class="ic" cx="12" cy="-7" r="4"/><circle class="ic" cx="-12" cy="9" r="4"/><circle class="ic" cx="12" cy="9" r="4"/>'+
     '<path class="ic" d="M-2 14L0 19L2 14Z"/><circle class="ic" cx="0" cy="-14" r="4.6"/>'+
     '<ellipse class="ic" cx="0" cy="1" rx="11" ry="13"/>'+
     '<path class="sd" d="M0-5L4-2V3L0 6L-4 3V-2ZM0-5V-12M4-2L10-6M-4-2L-10-6M4 3L10 7M-4 3L-10 7M0 6V12"/>'+
     '<circle class="dt" cx="-1.7" cy="-15" r=".9"/><circle class="dt" cx="1.7" cy="-15" r=".9"/>',
-  // 현무: 거북이 등을 뱀이 휘감은 모습
+  // 갸라도스: 거북이 등을 뱀이 휘감은 모습
   hyeonmu:
     '<circle class="ic" cx="-12" cy="-7" r="4"/><circle class="ic" cx="12" cy="-7" r="4"/><circle class="ic" cx="-12" cy="9" r="4"/><circle class="ic" cx="12" cy="9" r="4"/>'+
     '<circle class="ic" cx="0" cy="-14" r="4.6"/>'+
@@ -436,13 +437,13 @@ const ICON={
     '<circle class="dt" cx="5.5" cy="-7.5" r="2.6"/><circle class="ic" cx="6.3" cy="-8.3" r=".8"/>'+
     '<circle class="dt" cx="-1.7" cy="-15" r=".9" opacity=".0"/>'
 };
-function iconFor(t,o){return t===1?(o?ICON.bird:ICON.dragon):t===2?ICON.tiger:t===3?ICON.qilin:t===4?ICON.turtle:ICON.hyeonmu;}
+function iconFor(t,o){return t===1?(o?ICON.dragon:ICON.bird):t===2?ICON.tiger:t===3?ICON.qilin:t===4?ICON.turtle:ICON.hyeonmu;}
 function pieceSVG(t,o){
   let a='';
   for(const d of MOVES[t]){a+='<path class="arr" transform="translate('+POS[d][0]+' '+POS[d][1]+') rotate('+ANG[d]+')" d="M0-6L5.5 4H-5.5Z"/>';}
   return '<svg viewBox="0 0 100 100" aria-hidden="true"><path class="tile" d="M50 5 90 25V93H10V25Z"/>'+a+
     '<g transform="translate(50 48) scale(1.1)">'+iconFor(t,o)+'</g>'+
-    '<text class="nm" x="50" y="75" text-anchor="middle">'+NAMES[t]+'</text></svg>';
+    '<text class="nm" x="50" y="75" text-anchor="middle">'+nameOf(t,o)+'</text></svg>';
 }
 
 const $=id=>document.getElementById(id);
@@ -467,7 +468,7 @@ function loadSprites(){
     return Promise.all(urls.map(loadImg)).then(function(){
       var fr={0:{},1:{}};
       [1,2,3,4,5].forEach(function(t){
-        ['blue','red'].forEach(function(side,o){
+        ['red','blue'].forEach(function(side,o){
           var f=pc.frames[side][t];
           fr[o][t]=(pc.cols>1?f[0]/(pc.cols-1)*100:0)+'% '+(pc.rows>1?f[1]/(pc.rows-1)*100:0)+'%';
         });
@@ -480,8 +481,8 @@ function loadSprites(){
       st.setProperty('--board-img','url("'+urls[1]+'")');
       st.setProperty('--bpl',ins[0]+'%');st.setProperty('--bpr',ins[2]+'%');
       st.setProperty('--bpt',(ins[1]*4/3)+'%');st.setProperty('--bpb',(ins[3]*4/3)+'%');
-      st.setProperty('--tray0-h','url("'+urls[2]+'")');st.setProperty('--tray0-v','url("'+urls[3]+'")');
-      st.setProperty('--tray1-h','url("'+urls[4]+'")');st.setProperty('--tray1-v','url("'+urls[5]+'")');
+      st.setProperty('--tray0-h','url("'+urls[4]+'")');st.setProperty('--tray0-v','url("'+urls[5]+'")');
+      st.setProperty('--tray1-h','url("'+urls[2]+'")');st.setProperty('--tray1-v','url("'+urls[3]+'")');
       SPR={frames:fr,rotateOpponent:pc.rotateOpponent!==false};
       document.body.classList.add('sprmode');
     });
@@ -525,7 +526,7 @@ function doMove(m){
   let ns=apply(S,m);
   let reason='';
   if(ns.win>=0){
-    reason=(target&&(target&7)===1)?'대장을 잡았습니다':'대장이 상대 진영에 무사히 도착했습니다';
+    reason=(target&&(target&7)===1)?PLAYER[1-mover]+'를 잡았습니다':PLAYER[mover]+'가 상대 진영에 무사히 도착했습니다';
   }else if(gen(ns).length===0){
     ns.win=mover;reason='상대가 둘 수 있는 수가 없습니다';
   }
@@ -534,7 +535,7 @@ function doMove(m){
   if(S.win>=0){over={win:S.win,reason};}
   else if(rep.get(k)>=3){over={draw:true,reason:'같은 장면이 세 번 반복되었습니다'};}
   else if(m[0]>=0&&(S.b[m[1]]&7)===1&&((m[1]/3)|0)===GOAL[mover]){
-    note=PLAYER[mover]+' 대장 도착! 잡히지 않으면 승리';
+    note=PLAYER[mover]+' 도착! 잡히지 않으면 승리';
   }
   render();
   maybeAI();
@@ -579,10 +580,10 @@ function onChip(owner,t){
   render();
 }
 
-/* 잡은 말 영역 배경: 청룡은 물결 무늬와 용, 주작은 비늘 무늬와 봉황 */
+/* 잡은 말 영역 배경: 펄기아는 비늘 무늬와 봉황, 디아루가는 물결 무늬와 용 */
 const TRAYBG={
-  0:{pat:'<pattern id="pw0" width="24" height="12" patternUnits="userSpaceOnUse"><g class="tp"><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="8.5"/><circle cx="0" cy="6" r="5"/><circle cx="0" cy="6" r="8.5"/><circle cx="24" cy="6" r="5"/><circle cx="24" cy="6" r="8.5"/></g></pattern>',ic:ICON.dragon},
-  1:{pat:'<pattern id="pw1" width="16" height="8" patternUnits="userSpaceOnUse"><g class="tp"><path d="M0 8A8 8 0 0 1 16 8M-8 4A8 8 0 0 1 8 4M8 4A8 8 0 0 1 24 4"/></g></pattern>',ic:ICON.bird}
+  0:{pat:'<pattern id="pw0" width="16" height="8" patternUnits="userSpaceOnUse"><g class="tp"><path d="M0 8A8 8 0 0 1 16 8M-8 4A8 8 0 0 1 8 4M8 4A8 8 0 0 1 24 4"/></g></pattern>',ic:ICON.bird},
+  1:{pat:'<pattern id="pw1" width="24" height="12" patternUnits="userSpaceOnUse"><g class="tp"><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="8.5"/><circle cx="0" cy="6" r="5"/><circle cx="0" cy="6" r="8.5"/><circle cx="24" cy="6" r="5"/><circle cx="24" cy="6" r="8.5"/></g></pattern>',ic:ICON.dragon}
 };
 function trayBg(o){
   const b=TRAYBG[o];
@@ -632,7 +633,7 @@ function render(){
     if(over.draw){title='무승부';sub=over.reason;}
     else{dot='p'+over.win;title=PLAYER[over.win]+' 승리';sub=over.reason;}
   }else if(aiTurn()){
-    dot='p1';title='주작이 생각하는 중…';sub='잠시만 기다려 주세요';
+    dot='p1';title=PLAYER[1]+'가 생각하는 중…';sub='잠시만 기다려 주세요';
   }else{
     dot='p'+S.turn;title=PLAYER[S.turn]+' 차례';
     sub=sel?(sel.kind==='cell'?'표시된 칸으로 이동하거나 다른 말을 고르세요':'말을 놓을 빈 칸을 고르세요'):(note||'말을 눌러 이동하거나, 잡은 말을 놓으세요');
@@ -673,8 +674,8 @@ function buildLegend(){
   const desc={1:'가로 · 세로 · 대각선 모든 방향',2:'가로 · 세로',3:'대각선',4:'앞으로 한 칸',5:'가로 · 세로 · 앞쪽 대각선'};
   let h='';
   [1,2,3,4,5].forEach(function(t){
-    h+='<div>'+pcHTML(t,0,false)+'<span><b>'+NAMES[t]+(t===1?' · 청룡(용)':'')+(t===5?' (뒤집힌 거북기)':'')+'</b>'+desc[t]+'</span></div>';
-    if(t===1) h+='<div>'+pcHTML(1,1,false)+'<span><b>대장 · 주작(봉황)</b>'+desc[1]+'</span></div>';
+    h+='<div>'+pcHTML(t,0,false)+'<span><b>'+(t===1?PLAYER[0]+' (대장)':NAMES[t])+(t===5?' (뒤집힌 '+NAMES[4]+')':'')+'</b>'+desc[t]+'</span></div>';
+    if(t===1) h+='<div>'+pcHTML(1,1,false)+'<span><b>'+PLAYER[1]+' (대장)</b>'+desc[1]+'</span></div>';
   });
   $('legend').innerHTML=h;
 }
@@ -702,7 +703,7 @@ var PWA_ICON192='icons/icon-192.png',PWA_ICON512='icons/icon-512.png';
       }
     }else if(!document.querySelector('link[rel="manifest"]')&&/^https?:$/.test(location.protocol)&&location.origin!=='null'){
       var base=location.origin+location.pathname;
-      var man={id:base,name:'포켓배틀',short_name:'포켓배틀',description:'청룡과 주작이 신수 말로 겨루는 3×4 보드게임',lang:'ko',dir:'ltr',
+      var man={id:base,name:'포켓배틀',short_name:'포켓배틀',description:'펄기아와 디아루가가 겨루는 3×4 보드게임',lang:'ko',dir:'ltr',
         start_url:base,scope:base.replace(/[^\/]*$/,''),display:'standalone',orientation:'portrait',
         background_color:'#e5eae6',theme_color:'#e5eae6',categories:['games'],
         icons:[{src:PWA_ICON192,sizes:'192x192',type:'image/png',purpose:'any'},{src:PWA_ICON512,sizes:'512x512',type:'image/png',purpose:'any'},{src:PWA_ICON512,sizes:'512x512',type:'image/png',purpose:'maskable'}]};
