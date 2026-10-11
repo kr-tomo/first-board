@@ -8,13 +8,13 @@
 <meta name="theme-color" content="#0f1511" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="작룡투">
+<meta name="apple-mobile-web-app-title" content="포켓배틀">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <style>html{color-scheme:light}body{margin:0;font-size:14px}[hidden]{display:none!important}img{max-width:100%}</style>
-<title>작룡투</title>
+<title>포켓배틀</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;900&display=swap">
@@ -201,7 +201,7 @@ h1 small{font-family:var(--f-body);font-weight:500;font-size:.7rem;letter-spacin
 <body>
 <main class="app" id="app">
   <div class="top">
-    <h1>작룡투<small>靑龍 · 朱雀</small></h1>
+    <h1>포켓배틀<small>靑龍 · 朱雀</small></h1>
     <div class="btns">
       <button class="link" id="undoBtn" type="button">무르기</button>
       <button class="link" id="newBtn" type="button">새 게임</button>
@@ -693,7 +693,7 @@ var PWA_ICON192='icons/icon-192.png',PWA_ICON512='icons/icon-512.png';
     }
     ensureMeta('mobile-web-app-capable','yes');
     ensureMeta('apple-mobile-web-app-capable','yes');
-    ensureMeta('apple-mobile-web-app-title','작룡투');
+    ensureMeta('apple-mobile-web-app-title','포켓배틀');
     ensureMeta('apple-mobile-web-app-status-bar-style','black-translucent');
     if(!document.querySelector('link[rel="apple-touch-icon"]')) add('link',{rel:'apple-touch-icon',href:PWA_ICON192});
     if(EXPORTED){
@@ -702,7 +702,7 @@ var PWA_ICON192='icons/icon-192.png',PWA_ICON512='icons/icon-512.png';
       }
     }else if(!document.querySelector('link[rel="manifest"]')&&/^https?:$/.test(location.protocol)&&location.origin!=='null'){
       var base=location.origin+location.pathname;
-      var man={id:base,name:'작룡투',short_name:'작룡투',description:'청룡과 주작이 신수 말로 겨루는 3×4 보드게임',lang:'ko',dir:'ltr',
+      var man={id:base,name:'포켓배틀',short_name:'포켓배틀',description:'청룡과 주작이 신수 말로 겨루는 3×4 보드게임',lang:'ko',dir:'ltr',
         start_url:base,scope:base.replace(/[^\/]*$/,''),display:'standalone',orientation:'portrait',
         background_color:'#e5eae6',theme_color:'#e5eae6',categories:['games'],
         icons:[{src:PWA_ICON192,sizes:'192x192',type:'image/png',purpose:'any'},{src:PWA_ICON512,sizes:'512x512',type:'image/png',purpose:'any'},{src:PWA_ICON512,sizes:'512x512',type:'image/png',purpose:'maskable'}]};

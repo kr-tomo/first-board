@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "작룡투",
-  "short_name": "작룡투",
+  "name": "포켓배틀",
+  "short_name": "포켓배틀",
   "description": "청룡과 주작이 신수 말로 겨루는 3×4 보드게임",
   "lang": "ko",
   "dir": "ltr",
