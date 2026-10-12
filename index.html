@@ -136,7 +136,7 @@ h1 small{font-family:var(--f-body);font-weight:500;font-size:.7rem;letter-spacin
 .tray .lbl strong{font-family:var(--f-display);font-size:.95rem;color:var(--fg)}
 .tray .lbl i{font-style:normal;display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
 .tray.t1 .lbl i{background:var(--c1)} .tray.t0 .lbl i{background:var(--c0)}
-.mode-two .tray.t1 .lbl{transform:rotate(180deg)}
+.mode-two .tray.t1 .lbl,.mode-two .tray.t1 .empty{transform:rotate(180deg)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0;flex:1}
 .empty{font-size:.72rem;color:var(--muted)}
 .chip{position:relative;width:48px;height:48px;padding:0;border:0;background:transparent;border-radius:10px;cursor:pointer;flex:none}
@@ -258,7 +258,10 @@ body.abmode::before{content:"";position:fixed;inset:0;pointer-events:none;z-inde
 #fx .fxpc{position:fixed;margin:0;z-index:2;will-change:transform,filter}
 #fx .fxflash{position:fixed;inset:0;opacity:0}
 #fx .fxring{position:fixed;border-radius:50%;border:5px solid var(--fc);box-shadow:0 0 18px var(--fc),inset 0 0 14px var(--fc);opacity:0}
-#fx .fxban{position:fixed;left:0;right:0;top:36%;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0;text-align:center;color:#fff;font-family:var(--f-body);text-shadow:0 2px 10px rgba(0,0,0,.65)}
+#fx .fxwrap{position:fixed;inset:0}
+#fx .fxwrap.flip{transform:rotate(180deg)}
+.abflip .status{transform:rotate(180deg)}
+#fx .fxban{position:absolute;left:0;right:0;top:36%;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0;text-align:center;color:#fff;font-family:var(--f-body);text-shadow:0 2px 10px rgba(0,0,0,.65)}
 #fx .fxban::before{content:"";position:absolute;left:0;right:0;top:50%;height:112%;transform:translateY(-50%) skewY(-4deg);background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--fc) 88%,#000) 18%,var(--fc) 50%,color-mix(in srgb,var(--fc) 88%,#000) 82%,transparent);z-index:-1}
 #fx .fxban small{font-size:13px;font-weight:700;letter-spacing:.18em;opacity:.92}
 #fx .fxban b{font-size:30px;font-weight:900;letter-spacing:.06em}
@@ -692,7 +695,10 @@ function fxRing(r,o,delay){
 function fxBanner(o,ms){
   const e=document.createElement('div');e.className='fxban';e.style.setProperty('--fc',FXC[o]);
   e.innerHTML='<small>'+PLAYER[o]+' 필살기</small><b>'+ABN[o].n+'</b><span>'+ABN[o].d+'</span>';
-  fxLayer().appendChild(e);fxFlash(o,.38);
+  /* 둘이서 모드에서 디아루가(위쪽 팀) 배너는 그 팀이 보는 방향으로 돌리고 위치도 맞은편으로 옮깁니다. */
+  const w=document.createElement('div');w.className='fxwrap'+((mode==='two'&&o===1)?' flip':'');
+  w.appendChild(e);fxLayer().appendChild(w);fxFlash(o,.38);
+  setTimeout(function(){w.remove();},(ms||900)+150);
   if(fxRM()){fxAnim(e,[{opacity:1},{opacity:1}],{duration:ms||900});return;}
   fxAnim(e,[{opacity:0,transform:'scale(1.7)'},{opacity:1,transform:'scale(1)',offset:.2},{opacity:1,transform:'scale(1)',offset:.78},{opacity:0,transform:'scale(.92)'}],{duration:ms||900,easing:'cubic-bezier(.2,.8,.3,1)'});
 }
@@ -903,7 +909,7 @@ function renderTray(o){
 
 function render(){
   document.body.classList.toggle('mode-two',mode==='two');
-  document.body.classList.toggle('abmode',!!abil);document.body.classList.toggle('ab0',!!abil&&S.turn===0);document.body.classList.toggle('ab1',!!abil&&S.turn===1);
+  document.body.classList.toggle('abmode',!!abil);document.body.classList.toggle('abflip',!!abil&&mode==='two'&&S.turn===1);document.body.classList.toggle('ab0',!!abil&&S.turn===0);document.body.classList.toggle('ab1',!!abil&&S.turn===1);
   document.querySelectorAll('.seg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.mode===mode));});
   if(!COOL) cdShown=[null,null];
   const tg=targetsOf(),av=abil?abilValid():null;
