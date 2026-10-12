@@ -241,6 +241,31 @@ h1 small{font-family:var(--f-body);font-weight:500;font-size:.7rem;letter-spacin
 .cell.abs::after{inset:4%;border:4px solid var(--ab);border-radius:12px;background:color-mix(in srgb,var(--ab) 20%,transparent)}
 @keyframes abp{50%{opacity:.4}}
 .abmode .cell:not(.ab):not(.abs):not(.sel) .pc{opacity:.5}
+
+/* 필살기 연출 */
+body.abmode{--abc:var(--c0)}
+body.abmode.ab1{--abc:var(--c1)}
+body.abmode::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:5;background:radial-gradient(ellipse at center,transparent 48%,color-mix(in srgb,var(--abc) 40%,transparent) 100%);animation:abvig 1.8s ease-in-out infinite}
+@keyframes abvig{50%{opacity:.45}}
+.abmode .board{filter:drop-shadow(0 0 10px var(--abc));animation:abboard 1.4s ease-in-out infinite}
+@keyframes abboard{50%{filter:drop-shadow(0 0 22px var(--abc)) drop-shadow(0 0 4px var(--abc))}}
+.abmode .status{border-color:var(--abc);box-shadow:0 0 0 2px color-mix(in srgb,var(--abc) 45%,transparent)}
+.abmode .cell.sel .pc{animation:aura 1.1s ease-in-out infinite}
+@keyframes aura{0%,100%{filter:drop-shadow(0 0 3px var(--abc)) drop-shadow(0 2px 2px rgba(0,0,0,.32));transform:scale(1)}50%{filter:drop-shadow(0 0 14px var(--abc)) drop-shadow(0 0 5px var(--lit));transform:scale(1.06)}}
+.abmode .cell.ab::after,.abmode .cell.abs::after{border-color:var(--abc);box-shadow:0 0 12px color-mix(in srgb,var(--abc) 70%,transparent)}
+.abmode .cell.abs::after{background:color-mix(in srgb,var(--abc) 24%,transparent)}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+#fx .fxpc{position:fixed;margin:0;z-index:2;will-change:transform,filter}
+#fx .fxflash{position:fixed;inset:0;opacity:0}
+#fx .fxring{position:fixed;border-radius:50%;border:5px solid var(--fc);box-shadow:0 0 18px var(--fc),inset 0 0 14px var(--fc);opacity:0}
+#fx .fxban{position:fixed;left:0;right:0;top:36%;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0;text-align:center;color:#fff;font-family:var(--f-body);text-shadow:0 2px 10px rgba(0,0,0,.65)}
+#fx .fxban::before{content:"";position:absolute;left:0;right:0;top:50%;height:112%;transform:translateY(-50%) skewY(-4deg);background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--fc) 88%,#000) 18%,var(--fc) 50%,color-mix(in srgb,var(--fc) 88%,#000) 82%,transparent);z-index:-1}
+#fx .fxban small{font-size:13px;font-weight:700;letter-spacing:.18em;opacity:.92}
+#fx .fxban b{font-size:30px;font-weight:900;letter-spacing:.06em}
+#fx .fxban span{font-size:12px;font-weight:500;opacity:.9}
+@keyframes chipin{0%{transform:scale(.4)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+.chip.fxin{animation:chipin .42s ease-out}
+@media (prefers-reduced-motion:reduce){body.abmode::before,.abmode .board,.abmode .cell.sel .pc,.chip.fxin{animation:none}}
 @media (prefers-reduced-motion:reduce){.pc.new{animation:none}.tray{transition:none}.die.roll svg,.cd.ready .die,.cell.ab::after{animation:none}}
 </style>
 
@@ -306,6 +331,10 @@ h1 small{font-family:var(--f-body);font-weight:500;font-size:.7rem;letter-spacin
       <li>말은 바깥에 그려진 화살표 방향으로 한 칸 움직입니다. 말은 항상 자기 쪽을 향해 놓입니다.</li>
       <li>상대 말이 있는 칸으로 이동하면 그 말을 잡아 내 옆에 둡니다.</li>
       <li>잉어킹이 상대 진영에 도착하면 뒤집혀 갸라도스가 됩니다. 갸라도스를 잡으면 잉어킹으로 돌아옵니다.</li>
+    </ul>
+    <h3>선공</h3>
+    <ul>
+      <li>어느 팀이든 먼저 말을 움직인 팀이 선공입니다. 컴퓨터 대전에서는 먼저 말을 잡아 움직인 쪽이 내 팀이 되고, 반대 팀이 컴퓨터가 됩니다.</li>
     </ul>
     <h3>말 놓기</h3>
     <ul>
@@ -608,10 +637,16 @@ if(window.visualViewport) window.visualViewport.addEventListener('resize',fitApp
 let S,hist,rep,last,sel,over,mode='ai1',aiTimer=null,note='',abil=null,lastTap={i:-1,t:0},cdShown=[null,null];
 
 function isAI(){return mode!=='two';}
-function aiTurn(){return isAI()&&S.turn===1&&!over;}
+/* 컴퓨터 쪽은 첫 수를 둔 팀의 반대편입니다. 첫 수 전에는 정해지지 않습니다. */
+function aiSide(){return (isAI()&&hist.length)?1-hist[0].S.turn:-1;}
+function aiTurn(){return isAI()&&hist.length>0&&S.turn===aiSide()&&!over;}
+function setFirst(o){
+  if(S.turn===o) return;
+  S=Object.assign({},S,{turn:o});rep=new Map([[key(S),1]]);sel=null;
+}
 
 function newGame(){
-  clearTimeout(aiTimer);
+  clearTimeout(aiTimer);fxClear();
   S=init();hist=[];rep=new Map([[key(S),1]]);last=null;sel=null;over=null;note='';abil=null;cdShown=[null,null];lastTap={i:-1,t:0};
   render();
 }
@@ -630,7 +665,89 @@ function lastCells(m){
   return [m[0],m[1]];
 }
 
+const ABN={0:{n:'공간 역류',d:'말 하나를 잡은 말 영역으로'},1:{n:'시간 뒤틀림',d:'같은 팀 말 둘의 자리 교환'}};
+const FXC=['var(--c0)','var(--c1)'];
+function fxLayer(){let e=$('fx');if(!e){e=document.createElement('div');e.id='fx';document.body.appendChild(e);}return e;}
+function fxClear(){const e=$('fx');if(e) e.innerHTML='';document.querySelectorAll('.fxhide').forEach(function(x){x.classList.remove('fxhide');x.style.visibility='';});}
+function fxRM(){return window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;}
+function fxAnim(el,kf,o){
+  if(!el.animate){setTimeout(function(){el.remove();},o.duration);return null;}
+  const a=el.animate(kf,Object.assign({fill:'forwards',easing:'ease-out'},o));
+  a.onfinish=function(){if(o.keep!==true) el.remove();};
+  return a;
+}
+function fxFlash(o,a){
+  const e=document.createElement('div');e.className='fxflash';
+  e.style.background='radial-gradient(circle at 50% 45%,color-mix(in srgb,'+FXC[o]+' 70%,#fff) 0%,'+FXC[o]+' 45%,transparent 80%)';
+  fxLayer().appendChild(e);fxAnim(e,[{opacity:0},{opacity:a||.5,offset:.25},{opacity:0}],{duration:fxRM()?200:520});
+}
+function fxRing(r,o,delay){
+  if(fxRM()) return;
+  const e=document.createElement('div');e.className='fxring';e.style.setProperty('--fc',FXC[o]);
+  const sz=Math.max(r.width,r.height);
+  e.style.width=sz+'px';e.style.height=sz+'px';e.style.left=(r.left+r.width/2-sz/2)+'px';e.style.top=(r.top+r.height/2-sz/2)+'px';
+  fxLayer().appendChild(e);
+  fxAnim(e,[{opacity:.95,transform:'scale(.4)'},{opacity:0,transform:'scale(2.6)'}],{duration:760,delay:delay||0,fill:'both'});
+}
+function fxBanner(o,ms){
+  const e=document.createElement('div');e.className='fxban';e.style.setProperty('--fc',FXC[o]);
+  e.innerHTML='<small>'+PLAYER[o]+' 필살기</small><b>'+ABN[o].n+'</b><span>'+ABN[o].d+'</span>';
+  fxLayer().appendChild(e);fxFlash(o,.38);
+  if(fxRM()){fxAnim(e,[{opacity:1},{opacity:1}],{duration:ms||900});return;}
+  fxAnim(e,[{opacity:0,transform:'scale(1.7)'},{opacity:1,transform:'scale(1)',offset:.2},{opacity:1,transform:'scale(1)',offset:.78},{opacity:0,transform:'scale(.92)'}],{duration:ms||900,easing:'cubic-bezier(.2,.8,.3,1)'});
+}
+function fxGrab(i){
+  const el=$('board').querySelector('[data-i="'+i+'"] .pc');
+  if(!el) return null;
+  const r=el.getBoundingClientRect(),c=el.cloneNode(true);
+  c.classList.remove('new');
+  return {r:r,c:c};
+}
+function fxPiece(g){
+  const c=g.c;c.classList.add('fxpc');
+  c.style.left=g.r.left+'px';c.style.top=g.r.top+'px';c.style.width=g.r.width+'px';c.style.height=g.r.height+'px';
+  fxLayer().appendChild(c);return c;
+}
+/* 필살기 이동 연출: 말 복제본을 날려 보내고, 진짜 말은 도착할 때까지 숨깁니다. */
+function fxPlay(m,mover,pre){
+  const rm=fxRM(),T=rm?120:760;
+  fxFlash(mover,.34);
+  if(m[0]===-2&&pre){
+    [[pre.a,m[2]],[pre.b,m[1]]].forEach(function(x,n){
+      const g=x[0],to=$('board').querySelector('[data-i="'+x[1]+'"] .pc');
+      if(!g||!to) return;
+      const tr=to.getBoundingClientRect(),c=fxPiece(g);
+      to.style.visibility='hidden';to.classList.add('fxhide');
+      const dx=tr.left-g.r.left,dy=tr.top-g.r.top,sg=n?-1:1;
+      fxRing(g.r,mover);
+      fxAnim(c,[
+        {transform:'translate(0,0) rotate(0) scale(1)',filter:'drop-shadow(0 0 4px '+FXC[mover]+')'},
+        {transform:'translate('+(dx*.5-sg*g.r.height*.35)+'px,'+(dy*.5+sg*g.r.width*.35)+'px) rotate('+(sg*180)+'deg) scale(1.28)',filter:'drop-shadow(0 0 18px '+FXC[mover]+') brightness(1.25)',offset:.5},
+        {transform:'translate('+dx+'px,'+dy+'px) rotate('+(sg*360)+'deg) scale(1)',filter:'drop-shadow(0 0 4px '+FXC[mover]+')'}
+      ],{duration:T,easing:'cubic-bezier(.45,.05,.3,1)'});
+      setTimeout(function(){to.style.visibility='';to.classList.remove('fxhide');fxRing(tr,mover);},T);
+    });
+  }else if(m[0]===-3&&pre&&pre.a){
+    const g=pre.a,own=pre.owner;
+    const chip=document.querySelector('#tray'+own+' .chip[data-h="'+own+':'+pre.t+'"]');
+    if(!chip) return;
+    const ch=chip.querySelector('.pc')||chip,tr=ch.getBoundingClientRect(),c=fxPiece(g);
+    chip.style.visibility='hidden';chip.classList.add('fxhide');
+    const dx=tr.left+tr.width/2-(g.r.left+g.r.width/2),dy=tr.top+tr.height/2-(g.r.top+g.r.height/2),k=tr.width/g.r.width;
+    fxRing(g.r,mover);
+    fxAnim(c,[
+      {transform:'translate(0,0) rotate(0) scale(1)',filter:'drop-shadow(0 0 4px '+FXC[mover]+')'},
+      {transform:'translate('+(dx*.25)+'px,'+(dy*.25-g.r.height*.4)+'px) rotate(200deg) scale(1.22)',filter:'drop-shadow(0 0 18px '+FXC[mover]+') brightness(1.3)',offset:.35},
+      {transform:'translate('+dx+'px,'+dy+'px) rotate(520deg) scale('+k+')',filter:'drop-shadow(0 0 6px '+FXC[mover]+')',opacity:.9}
+    ],{duration:T+80,easing:'cubic-bezier(.5,0,.3,1)'});
+    setTimeout(function(){chip.style.visibility='';chip.classList.remove('fxhide');chip.classList.add('fxin');fxRing(tr,mover);},T+80);
+  }
+}
+
 function doMove(m){
+  let pre=null;
+  if(m[0]===-2) pre={a:fxGrab(m[1]),b:fxGrab(m[2])};
+  else if(m[0]===-3){pre={a:fxGrab(m[1]),owner:S.b[m[1]]>>3,t:S.b[m[1]]&7};}
   hist.push(snap());
   const mover=S.turn;
   const target=m[0]>=0?S.b[m[1]]:0;
@@ -652,6 +769,7 @@ function doMove(m){
     note=PLAYER[mover]+' 도착! 잡히지 않으면 승리';
   }
   render();
+  if(m[0]<-1) fxPlay(m,mover,pre);
   maybeAI();
 }
 function maybeAI(){
@@ -660,15 +778,17 @@ function maybeAI(){
   aiTimer=setTimeout(function(){
     if(!aiTurn()) return;
     const m=aiPick(S,mode==='ai1'?1:2,rep);
-    if(m) doMove(m);
-  },380);
+    if(!m) return;
+    if(m[0]<-1){fxBanner(S.turn,1000);aiTimer=setTimeout(function(){if(aiTurn()) doMove(m);},900);}
+    else doMove(m);
+  },(last&&last[0]<-1)?1100:380);
 }
 function undo(){
   if(!hist.length) return;
   clearTimeout(aiTimer);
   restore(hist.pop());
-  if(isAI()&&S.turn===1&&hist.length) restore(hist.pop());
-  sel=null;abil=null;render();
+  if(aiTurn()&&hist.length) restore(hist.pop());
+  fxClear();sel=null;abil=null;render();
 }
 
 function targetsOf(){
@@ -700,8 +820,13 @@ function enterAbility(){
   abil={kind:o===0?'recall':'swap',picks:[]};sel=null;note='';
   if(!abilValid().size){abil=null;note=PLAYER[o]+' 필살기를 쓸 수 있는 말이 없습니다';}
   render();
+  if(abil){
+    fxBanner(o,820);
+    const cp=$('board').querySelector('.cell.sel .pc');
+    if(cp){const r=cp.getBoundingClientRect();fxRing(r,o);fxRing(r,o,220);}
+  }
 }
-function cancelAbility(){abil=null;render();}
+function cancelAbility(){abil=null;fxClear();render();}
 function abilTap(i){
   if(abil.picks.length===1&&abil.picks[0]===i){abil.picks=[];render();return;}
   if(!abilValid().has(i)){render();return;}
@@ -716,6 +841,7 @@ function onCell(i){
   const now=Date.now(),dbl=lastTap.i===i&&now-lastTap.t<360;
   lastTap={i:i,t:dbl?0:now};
   const p=S.b[i];
+  if(!hist.length&&!abil&&p&&(p>>3)!==S.turn&&!targetsOf().has(i)) setFirst(p>>3);
   if(dbl&&p&&(p&7)===1&&(p>>3)===S.turn){
     if(abil){cancelAbility();return;}
     if(abilReady(S,S.turn)){enterAbility();return;}
@@ -768,16 +894,16 @@ function renderTray(o){
     chips+='<button type="button" class="chip'+(on?' sel':'')+(locked?' locked':'')+'" data-h="'+o+':'+t+'" '+(dis?'disabled':'')+
       ' aria-label="'+PLAYER[o]+' '+NAMES[t]+' '+n+'개 놓기'+(locked?' (잠김)':'')+'">'+pcHTML(t,o,o===1)+'<b class="cnt">'+n+'</b>'+(locked?'<i class="lkb">'+LOCK_SVG+'</i>':'')+'</button>';
   }
-  const name=PLAYER[o]+(o===1&&isAI()?' · 컴퓨터':'');
-  el.className='tray t'+o+((S.turn===o&&!over)?' on':'');
-  el.innerHTML=trayBg(o)+'<div class="lbl"><strong><i></i>'+PLAYER[o]+'</strong><span>'+(o===1&&isAI()?'컴퓨터':'잡은 말')+'</span></div>'+
+  const name=PLAYER[o]+(o===aiSide()?' · 컴퓨터':'');
+  el.className='tray t'+o+((S.turn===o&&!over&&(hist.length||sel))?' on':'');
+  el.innerHTML=trayBg(o)+'<div class="lbl"><strong><i></i>'+PLAYER[o]+'</strong><span>'+(o===aiSide()?'컴퓨터':'잡은 말')+'</span></div>'+
     '<div class="chips">'+(chips||'<span class="empty">잡은 말이 놓입니다</span>')+'</div>';
   el.setAttribute('aria-label',name+' 잡은 말');
 }
 
 function render(){
   document.body.classList.toggle('mode-two',mode==='two');
-  document.body.classList.toggle('abmode',!!abil);
+  document.body.classList.toggle('abmode',!!abil);document.body.classList.toggle('ab0',!!abil&&S.turn===0);document.body.classList.toggle('ab1',!!abil&&S.turn===1);
   document.querySelectorAll('.seg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.mode===mode));});
   if(!COOL) cdShown=[null,null];
   const tg=targetsOf(),av=abil?abilValid():null;
@@ -813,12 +939,15 @@ function render(){
     if(over.draw){title='무승부';sub=over.reason;}
     else{dot='p'+over.win;title=PLAYER[over.win]+' 승리';sub=over.reason;}
   }else if(aiTurn()){
-    dot='p1';title=PLAYER[1]+'가 생각하는 중…';sub='잠시만 기다려 주세요';
+    dot='p'+S.turn;title=PLAYER[S.turn]+'가 생각하는 중…';sub='잠시만 기다려 주세요';
   }else if(abil){
     dot='p'+S.turn;title=PLAYER[S.turn]+' 필살기 발동';
     sub=abil.kind==='recall'?'되돌릴 말을 고르세요':(abil.picks.length?'바꿀 두 번째 말을 고르세요':'같은 팀 말 두 개를 고르세요');
+  }else if(!hist.length&&!sel){
+    title='먼저 둘 팀을 고르세요';
+    sub=isAI()?'먼저 말을 움직이면 그 팀이 내 팀':'먼저 움직인 팀이 선공';
   }else{
-    dot='p'+S.turn;title=PLAYER[S.turn]+' 차례';
+    dot='p'+S.turn;title=PLAYER[S.turn]+(hist.length?' 차례':' 선공');
     sub=sel?(sel.kind==='cell'?'표시된 칸으로 이동하세요':'말을 놓을 빈 칸을 고르세요'):(note||(abilReady(S,S.turn)?'필살기 준비 · 대장 더블 탭':'말을 눌러 이동 · 잡은 말 놓기'));
   }
   $('stxt').innerHTML='<span class="dot '+dot+'"></span><div><b>'+title+'</b><span>'+sub+'</span></div>';

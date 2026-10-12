@@ -1,5 +1,5 @@
 /* 포켓배틀 서비스 워커: 한 번 열면 오프라인에서도 실행됩니다. 파일을 고치면 VERSION 값을 올리세요. */
-const VERSION = 'pocketbattle-v7';
+const VERSION = 'pocketbattle-v8';
 const CORE = [
   './',
   'index.html',
